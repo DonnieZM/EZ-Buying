@@ -1,0 +1,86 @@
+{% extends 'base.html' %} {% block title %} Ez$ & Buying | Inicio {% endblock %}
+{% block content %}
+<nav class="catNav">
+  <div class="container">
+    <ul class="catNav-links">
+      {% for category in categories %}
+      <div class="catNav-links-item" onclick="getByCat(this)">{{category}}</div>
+      {% endfor %}
+    </ul>
+  </div>
+</nav>
+<section id="heroContainer" class="hero" >
+  <h1>
+    Los productos de mayor calidad se encuentran en EZ$ & Buying
+  </h1>
+  <section class="search">
+    <div class="container">
+      <div class="search-inputGroup">
+        <input
+          type="text"
+          name="search"
+          placeholder="Qué estás buscando hoy?"
+          id="searchInput"
+        />
+        <button id="searchBtn">Encontrar</button>
+      </div>
+  
+      <div class="search-cognitive" id="cogBtn">
+        <i class="fas fa-camera"></i>
+      </div>
+    </div>
+  </section>
+</section>
+
+<div id="search-in-results" >
+  <section class="search">
+    <div class="container">
+      <div class="search-inputGroup">
+        <input
+          type="text"
+          name="search"
+          placeholder="Qué estás buscando hoy?"
+          id="searchInput2"
+        />
+        <button id="searchBtn2">Encontrar</button>
+      </div>
+  
+      <div class="search-cognitive" id="cogBtn2">
+        <i class="fas fa-camera"></i>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<!-- ======== SEARCH BY IMAGE MODAL ========= -->
+<section class="modal">
+  <div class="modal-container">
+    <i class="fas fa-times" id="closeModal"></i>
+    <h2 class="modal-title">Sube una foto y busca productos similares</h2>
+    <form
+      action="/upload-image"
+      method="POST"
+      enctype="multipart/form-data"
+      class="modal-photoContainer"
+    >
+      <label for="imgInput" class="modal-photoContainer-uploadBtn"
+        >Subir foto</label
+      >
+      <input type="file" name="image" id="imgInput" />
+    </form>
+    <div class="modal-buttonRow">
+      <button class="searchBtn" id="cogSearch">Buscar</button>
+    </div>
+  </div>
+</section>
+
+<section class="products">
+  <div class="container"></div>
+</section>
+<script src="{{url_for('static', filename='scripts/getProducts.js')}}"></script>
+<script>
+  on_index = true;
+  on_index ? document.body.style.overflow = 'hidden' : document.body.style.overflow = 'initial';
+</script>
+{% endblock %}
