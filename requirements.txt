@@ -16,7 +16,7 @@ flask_cors
 flask-mysql
 requests
 bcrypt
-jwt
+PyJWT
 marshmallow-sqlalchemy
 stripe
 gunicorn
