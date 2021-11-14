@@ -1,1 +1,1 @@
-web: gunicorn market:app --preload -b
+web: gunicorn market:app --preload
