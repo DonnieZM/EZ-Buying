@@ -1,4 +1,6 @@
 const addBtn = document.getElementById('addProduct')
+const accountInfoName = document.getElementById('accountInfoName')
+const accountInfoType = document.getElementById('accountInfoType')
 let selectedId
 
 addBtn.addEventListener('click', () => {
@@ -20,6 +22,11 @@ async function getProducts() {
 
     const data = await res.json()
     console.log('data: ', data)
+    console.log(`data shop`, data.shop.name)
+    const accountName = data.shop.name
+    const accountType = 'Tienda'
+    accountInfoName.innerHTML = `Nombre: ${data.shop.name}`
+    accountInfoType.innerHTML = `Tipo: ${accountType}` 
     const products = data.products
     const productsEl = document.querySelector('.shop-products')
     products.forEach((product) => {
@@ -64,6 +71,7 @@ async function getProducts() {
       deleteEl.id = 'deleteBtn'
       deleteEl.innerText = 'Eliminar'
       deleteEl.addEventListener('click', deleteItem)
+      editEl.addEventListener('click', editItem)
       buttonsEl.appendChild(deleteEl)
       productsEl.appendChild(itemEl)
     })
@@ -98,6 +106,10 @@ function deleteItem(e) {
   rowEl.appendChild(noEl)
   parent.appendChild(alertEl)
   console.log('selected id: ', selectedId)
+}
+
+function editItem(e) {
+  
 }
 
 async function confirmDelete(e) {

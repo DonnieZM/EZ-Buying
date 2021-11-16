@@ -1,12 +1,12 @@
 const addToCartBtn = document.querySelector('.detail-infoCol-buyBtn')
-
+const alert = document.getElementById('alert')
 
 addToCartBtn.addEventListener('click', (e) => {
   e.preventDefault()
   // conseguir id del producto de la url
   const pieces = window.location.href.split('/')
-  const id = pieces[pieces.length-1]
-
+  const id = pieces[pieces.length-1] === "fakeProducts" ? document.getElementById("product-id").innerHTML : pieces[pieces.length-1]
+  console.log(`id`, id)
   const title = document.querySelector('.detail-infoCol-title').innerText
   const price = parseInt(document.querySelector('.detail-infoCol-price').innerText.split('$')[1])
   const imgUrl = document.querySelector('.detail-imgCol img').src
@@ -14,6 +14,7 @@ addToCartBtn.addEventListener('click', (e) => {
   
   const product = JSON.stringify({id, title, price, imgUrl, qty})
   saveToSession(product)
+  alert.style.display = 'block'
 })
 
 

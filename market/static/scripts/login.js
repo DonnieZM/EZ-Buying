@@ -75,8 +75,8 @@ async function login(e) {
       }
     })
     const data = await res.json()
-    console.log('data: ', data)
-
+    console.log('data222: ', data)
+    
     if(data.status == 200) {
       console.log('autenticado')
       document.cookie = `ezjwt=${data.token};max-age=${24*60*60}` // guardar token como cookie

@@ -4,6 +4,7 @@ const totalDiv = document.querySelector('.cart-footer-total')
 const buyBtn = document.querySelector('.cart-footer-payBtn')
 
 function buildCart() {
+  //sessionStorage.clear()
   const cart = JSON.parse(sessionStorage.getItem('cart'))
   const cartBody = document.querySelector('.cart-body')
   let total = 0
