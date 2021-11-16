@@ -30,7 +30,7 @@
           </i>
         {% else %}
           <i class="mainNav-item fas fa-user-circle" id="user">
-          
+         
             <nav class="userNav">
               <a href="{{ url_for('login') }}">Ingresar</a>
               <a href="{{ url_for('signup') }}">Crear cuenta</a>
@@ -44,9 +44,12 @@
       </div>
     </div>
   </nav>
-
   <section class="shop">
     <div class="container">
+      <div class="accountInfoContainer" >
+        <h3 id="accountInfoName" ></h3>
+        <h3 id="accountInfoType" ></h3>
+      </div>
       <nav class="shop-nav">
         <a href="{{ url_for('shopProfile', id=shop.id) }}" class="shop-nav-link active">Mi perfil</a>
         <a href="" class="shop-nav-link">Mis productos</a>

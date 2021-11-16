@@ -9,6 +9,13 @@
     </ul>
   </div>
 </nav>
+<!-- <nav class="catNav">
+  <div class="container">
+    <ul class="catNav-links" >
+      <div class="catNav-links-item" onclick="getByCat(this)">Chamarras</div>
+    </ul>
+  </div>
+</nav> -->
 <section id="heroContainer" class="hero" >
   <h1>
     Los productos de mayor calidad se encuentran en EZ$ & Buying
@@ -25,7 +32,7 @@
         <button id="searchBtn">Encontrar</button>
       </div>
   
-      <div class="search-cognitive" id="cogBtn">
+      <div class="search-cognitive" id="cogBtn" >
         <i class="fas fa-camera"></i>
       </div>
     </div>
@@ -64,13 +71,14 @@
       enctype="multipart/form-data"
       class="modal-photoContainer"
     >
-      <label for="imgInput" class="modal-photoContainer-uploadBtn"
-        >Subir foto</label
-      >
+      
       <input type="file" name="image" id="imgInput" />
     </form>
     <div class="modal-buttonRow">
       <button class="searchBtn" id="cogSearch">Buscar</button>
+      <label for="imgInput" class="modal-photoContainer-uploadBtn"
+        >Subir foto</label
+      >
     </div>
   </div>
 </section>

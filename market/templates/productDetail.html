@@ -19,6 +19,10 @@ Ez$ & Buying | Producto
             <div class="detail-infoCol-price">${{product.price}}</div>
             <button class="detail-infoCol-buyBtn">Agregar al carrito</button>
           </div>
+          <div id="alert" class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+            <strong>Producto Agregado</strong> Tu producto ha sido Agregado al carrito con éxito.
+          </div>
           <div class="detail-infoCol-description">
             <p>{{product.description}}</p>
           </div>

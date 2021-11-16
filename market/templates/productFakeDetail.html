@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Ez$ & Buying | Producto
+{% endblock %}
+
+{% block content %}
+  <section class="detail">
+    <div class="container">
+      <div class="detailContainer">
+        <a href="/" class="detail-back">REGRESAR</a>
+        <div class="detail-imgCol">
+          <img id="product-img" src="" alt="">
+        </div>
+        <div class="detail-infoCol">
+          <h2 id="product-title" class="detail-infoCol-title">TITULO</h2>
+          <span id="product-id" hidden></span>
+          <div class="detail-infoCol-priceRow">
+            <div id="product-price" class="detail-infoCol-price">PRECIO</div>
+            <button id="addFakeProduct" class="detail-infoCol-buyBtn">Agregar al carrito</button>
+          </div>
+          <div id="alert" class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+            <strong>Producto Agregado</strong> Tu producto ha sido Agregado al carrito con éxito.
+          </div>
+          <div class="detail-infoCol-description">
+            <p id="product-desc" >DESCRIPTION</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="{{url_for('static', filename='scripts/addToCart.js')}}"></script>
+  <script>
+    // buscar el producto por su ID
+    (async function() {
+      let allCookies = document.cookie; 
+      let productID = []
+      JSON.stringify(allCookies)
+      //sacamos todos las cookies y obtenemos solo la del ID del producto
+      let Arraycookies = allCookies.split(";")
+      Arraycookies.forEach(element => {
+        element.startsWith(" prodId=") ? productID.push(element) : null
+      });
+      let prodId = productID[0].split('=')[1] 
+      try {
+        const res = await fetch(`https://fakestoreapi.com/products/${prodId}`)
+        const data = await res.json()
+        console.log(`data`, data)
+        //construimos la info de los productos
+        const productTitle = document.getElementById('product-title')
+        const productPrice = document.getElementById("product-price")
+        const productDesc = document.getElementById("product-desc")
+        const productImg = document.getElementById("product-img")
+        const productId = document.getElementById("product-id")
+        productTitle.innerHTML = data.title
+        productPrice.innerHTML = `$${data.price}`
+        productDesc.innerHTML = data.description
+        productImg.src = data.image 
+        productId.innerHTML = data.id
+      } catch (error) {
+        console.log(`error`, error)
+      }
+    
+    })();
+    </script>
+{% endblock %}
