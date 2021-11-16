@@ -1,4 +1,6 @@
+from itertools import product
 from sys import path
+import flask
 from flask.helpers import make_response, url_for
 from flask.wrappers import Request
 from werkzeug.wrappers import request
@@ -73,7 +75,13 @@ def searchProducts():
 @app.route('/products/<id>')
 def product_page(id):
     product = Product.query.filter_by(id=id).first()
+    print(product)
     return render_template('productDetail.html', product=product)
+
+@app.route('/fakeProducts')
+def fake_product_page():
+    return render_template("productFakeDetail.html")
+
 
 
 # FUNCIÓN: mostrar página de login
@@ -92,7 +100,7 @@ def login_submit():
     email = data.get('email')
     type = data.get('loginType')
     password = data.get('password').encode()
-
+    redirectTo='/'
     # Validar si ya existe uno
     if type == 'user':
         existingUser = User.query.filter_by(email=email).first()
@@ -109,7 +117,8 @@ def login_submit():
     if type == 'user':
         redirectTo = '/' 
     elif type == 'shop':
-        redirectTo = f'shop/{existingUser.id}'
+        redirectTo = f'shop/{existingUser.id}/products'
+        print(existingUser)
     
     # Comparación de contraseñas
     hashed = existingUser.password_hash.encode()
@@ -214,8 +223,8 @@ def create_checkout_session():
     }],
     mode='payment',
 
-    success_url='http://localhost:5000/success',
-    cancel_url='http://localhost:5000/cancel',
+    success_url='https://ez-buying.herokuapp.com/success',
+    cancel_url='https://ez-buying.herokuapp.com/cancel',
   )
   return jsonify(session)
 
@@ -392,10 +401,10 @@ def uploadCogImg():
 # FUNCIÓN: COGNITIVO
 @app.route('/cognitivo')
 def cognitivo():
-    skey = '9019154e7a1b4d8db3a847658beb3f6c'
-    endpoint = 'https://southcentralus.api.cognitive.microsoft.com/'
+    skey = '350685a9bcbb437faf47c70aa5401af3'
+    endpoint = 'https://computervisionarb.cognitiveservices.azure.com/'
     cognitivo_url = endpoint + "/vision/v3.2/analyze?visualFeatures=Objects"
-    #documents = {"url":"https://localhost:5000/static/cogImage.jpg"}
+    documents = {"url":"https://localhost:5000/static/cogImage.jpg"}
 
     _headers = {"Ocp-Apim-Subscription-Key": skey, 'Content-Type': 'application/octet-stream'}
     imageName = 'cogImage.jpg'
