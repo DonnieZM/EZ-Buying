@@ -125,10 +125,34 @@ function buy(e) {
   e.preventDefault()
   console.log('buy')
 
+  let line_items = []
+
+  const cart = JSON.parse(sessionStorage.getItem('cart'))
+  console.log('cart', cart)
+
+  cart.forEach((item) => {
+    const cartItem = JSON.parse(item)
+    console.log(cartItem)
+    const newItem = {
+      'price_data': {
+          'currency': 'mxn',
+          'product_data': {
+              'name': cartItem.title,
+          },
+          'unit_amount': cartItem.price * 100,
+      },
+      'quantity': cartItem.qty,
+  }
+  line_items.push(newItem)
+  console.log('newItem', newItem)
+  })
+
+  console.log('line_items: ', line_items)
+
   fetch('/create-checkout-session', {
     method: 'POST',
-    // body: JSON.stringify({ id }),
-    mode: 'no-cors',
+    body: JSON.stringify({ line_items }),
+    // mode: 'no-cors',
     headers: {
       'Content-Type': 'application/json',
     },

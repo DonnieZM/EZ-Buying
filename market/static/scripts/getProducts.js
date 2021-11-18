@@ -54,11 +54,12 @@ async function getProducts() {
 
 async function searchProducts() {  
   const search = searchInput.value;
+  const catid = null
   console.log(`search`, search)
   try {
     const res = await fetch('/products', {
       method: 'POST',
-      body: JSON.stringify({ search }),
+      body: JSON.stringify({ search, catid }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -74,11 +75,19 @@ async function searchProducts() {
 
 async function searchProducts2() {  
   const search = searchInput2.value;
-  console.log(`search`, search)
+  const activecat = document.querySelector('.catNav-links-item.active')
+  console.log('activecat: ', activecat)
+  let catid
+  if (activecat == null) {
+    catid = null
+  } else {
+    catid = activecat.getAttribute('catid')
+  }
+  console.log('catid: ', catid)
   try {
     const res = await fetch('/products', {
       method: 'POST',
-      body: JSON.stringify({ search }),
+      body: JSON.stringify({ search, catid }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -95,20 +104,29 @@ async function getByCat(e) {
   const cats = document.querySelectorAll('.catNav-links-item');
   cats.forEach((cat) => cat.classList.remove('active'));
   // productContainer.innerHTML = ''
-  const cat = e.innerText;
-  console.log(`cat`, cat)
+  
+  const catName = e.innerText;
   e.classList.add('active');
+  const catid = e.getAttribute('catid')
+  const search = searchInput2.value;
 
   try {
-    const res = await fetch(`https://fakestoreapi.com/products/category/${cat}`);
+    const res = await fetch('/products', {
+      method: 'POST',
+      body: JSON.stringify({ catid, search }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     const products = await res.json();
-    console.log(`products: `, products )
-    buildFakeProducts(products);
+    console.log(`products`, products)
+    buildProducts(products);
     return;
   } catch (error) {
     console.error(error);
   }
 }
+
 function buildFakeProducts(products) {
   document.body.style.overflow = 'initial'
   heroCover.style.display = 'none';
@@ -140,6 +158,8 @@ function buildFakeProducts(products) {
     const priceEl = document.createElement('p');
     priceEl.classList.add('products-item-info-price');
     priceEl.innerText = '$' + product.price;
+
+    console.log('shopid', product.shop_id)
 
     infoDiv.appendChild(titleEl);
     infoDiv.appendChild(priceEl);
@@ -184,6 +204,9 @@ function buildProducts(products) {
     const priceEl = document.createElement('p');
     priceEl.classList.add('products-item-info-price');
     priceEl.innerText = '$' + product.price;
+
+    console.log('shopid', product.shop_id)
+    // console.log('categoryid', product.category_id)
 
     infoDiv.appendChild(titleEl);
     infoDiv.appendChild(priceEl);
@@ -283,3 +306,4 @@ document.getElementById("move-chat").addEventListener("click",function(){
 });
 
 getProducts();
+

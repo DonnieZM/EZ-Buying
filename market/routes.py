@@ -14,7 +14,7 @@ import uuid
 # import urllib.request
 from market import db
 from market.models import User, Product, Shop, Category, Event
-from market.models import ProductSchema, ShopSchema
+from market.models import ProductSchema, ShopSchema, CategorySchema
 from market.middleware import checkUser, checkShop
 import stripe
 
@@ -25,11 +25,12 @@ stripe.api_key = 'sk_test_51JjPWsJkRyrBj4D7PLvp7YSXb2Li7e6FaTdOxRAt2xId9FdX66ZHa
 # FUNCIÓN: mostrar página de home
 # HTML: index.html
 @app.route('/')
-#@checkUser
+# @checkUser
 def index():
     # buscar categorias para msotrarlas en barra de categorias
-    categoriesRequest = requests.get('https://fakestoreapi.com/products/categories')
-    categories = json.loads(categoriesRequest.content)
+    searchCats = Category.query.all()
+    product_schema = CategorySchema(many=True)
+    categories = product_schema.dump(searchCats)
     return render_template('index.html', categories=categories)
 
 
@@ -51,10 +52,10 @@ def index():
 
 @app.route('/api')
 def apiConsulta():
-    #crear un diccionario
-    #diccionario = {'descripcion': }
-
+    # crear un diccionario
+    # diccionario = {'descripcion': }
     return ""
+
 
 # FUNCIÓN: cargar productos segun barra de busqueda
 # HTML: index.html
@@ -63,7 +64,15 @@ def apiConsulta():
 def searchProducts():
     data = request.json
     search = data.get('search')
-    searchproducts = Product.query.filter(Product.name.contains(search)).all()
+    catid = data.get('catid')
+    print('catid: ', catid)
+
+    if not catid:
+        searchproducts = Product.query.filter(
+            Product.name.contains(search)).all()
+    else:
+        searchproducts = Product.query.filter_by(
+            category_id=catid).filter(Product.name.contains(search)).all()
     product_schema = ProductSchema(many=True)
     products = product_schema.dump(searchproducts)
     return jsonify(products)
@@ -78,16 +87,16 @@ def product_page(id):
     print(product)
     return render_template('productDetail.html', product=product)
 
+
 @app.route('/fakeProducts')
 def fake_product_page():
     return render_template("productFakeDetail.html")
 
 
-
 # FUNCIÓN: mostrar página de login
 # HTML: login.html
 @app.route('/login', methods=['GET'])
-def login():    
+def login():
     return render_template('login.html')
 
 
@@ -100,7 +109,7 @@ def login_submit():
     email = data.get('email')
     type = data.get('loginType')
     password = data.get('password').encode()
-    redirectTo='/'
+    redirectTo = '/'
     # Validar si ya existe uno
     if type == 'user':
         existingUser = User.query.filter_by(email=email).first()
@@ -112,20 +121,22 @@ def login_submit():
         message = 'No existe un usuario con ese correo'
         data = jsonify(message)
         return data
-    
+
     # Redirección diferente para usuarios y tiendas
     if type == 'user':
-        redirectTo = '/' 
+        redirectTo = '/'
     elif type == 'shop':
         redirectTo = f'shop/{existingUser.id}/products'
         print(existingUser)
-    
+
     # Comparación de contraseñas
     hashed = existingUser.password_hash.encode()
     if bcrypt.checkpw(password, hashed):
         id = existingUser.id
-        token = jwt.encode({'id':id, 'type': type}, app.config['SECRET_KEY'], algorithm='HS256') #falta agregar expiresIn
-        
+        # falta agregar expiresIn
+        token = jwt.encode({'id': id, 'type': type},
+                           app.config['SECRET_KEY'], algorithm='HS256')
+
         return jsonify({'token': token, 'status': 200, 'redirectTo': redirectTo})
     else:
         message = 'Usuario o contraseña incorrectos.'
@@ -138,9 +149,9 @@ def login_submit():
 @app.route('/logout', methods=['GET'])
 def logout():
     # Response.delete_cookie('ezjwt', path='/')
-    #return 'bye'
+    # return 'bye'
     return render_template('index.html')
-    #ESTA FUNCIÓN AUN NO ESTÁ COMPLETA*****
+    # ESTA FUNCIÓN AUN NO ESTÁ COMPLETA*****
 
 
 # FUNCIÓN: mostrar página de Crear cuenta
@@ -170,7 +181,7 @@ def signup_submit():
         message = 'Ese correo ya se encuentra registrado'
         data = jsonify(message)
         return data
-    
+
     # Password hash
     password = data.get('password').encode()
     hashed = bcrypt.hashpw(password, bcrypt.gensalt())
@@ -194,7 +205,9 @@ def signup_submit():
 
     # Generar TOKEN
     id = created.id
-    token = jwt.encode({id: id, type: type}, app.config['SECRET_KEY'], algorithm='HS256') #falta agregar expiresIn
+    # falta agregar expiresIn
+    token = jwt.encode({id: id, type: type},
+                       app.config['SECRET_KEY'], algorithm='HS256')
 
     # Regresar token y donde redireccionar
     return jsonify({'token': token, 'redirectTo': redirectTo})
@@ -209,24 +222,18 @@ def cart():
 
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
-  session = stripe.checkout.Session.create(
-    payment_method_types=['card'],
-    line_items=[{
-      'price_data': {
-        'currency': 'usd',
-        'product_data': {
-          'name': 'T-shirt',
-        },
-        'unit_amount': 2000,
-      },
-      'quantity': 1,
-    }],
-    mode='payment',
+    data = request.json
+    print(data)
+    items = data.get('line_items')
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=items,
+        mode='payment',
 
-    success_url='https://ez-buying.herokuapp.com/success',
-    cancel_url='https://ez-buying.herokuapp.com/cancel',
-  )
-  return jsonify(session)
+        success_url='https://ez-buying.herokuapp.com/success',
+        cancel_url='https://ez-buying.herokuapp.com/cancel',
+    )
+    return jsonify(session)
 
 
 # FUNCIÓN: mostrar página de pago fallido
@@ -266,8 +273,8 @@ def updateShop(id):
 
     # buscar la tienda relevante
     shop = Shop.query.filter_by(id=id).first()
-    
-    #solo modificar datos si el input no estaba vacío
+
+    # solo modificar datos si el input no estaba vacío
     if len(name) > 0:
         shop.name = name
     if len(email) > 0:
@@ -287,7 +294,7 @@ def updateShop(id):
 @app.route('/shop/<id>/products', methods=['GET'])
 def shopProducts(id):
     shop = Shop.query.filter_by(id=id).first()
-    return render_template('shopProducts.html', shop=shop) 
+    return render_template('shopProducts.html', shop=shop)
 
 
 # FUNCIÓN: cargar datos de Tienda y sus Productos
@@ -328,7 +335,8 @@ def createProduct(id):
     print('image:', image)
 
     # guardar en base de datos
-    product = Product(name=name, price=price, description=description, category_id=category, shop_id=id, image=image) # crea una instancia del VO
+    product = Product(name=name, price=price, description=description,
+                      category_id=category, shop_id=id, image=image)  # crea una instancia del VO
     db.session.add(product)
     db.session.commit()
     return jsonify({'message': 'Tu producto ha sido creado.'})
@@ -344,16 +352,19 @@ def uploadImg():
         image = request.files['image']
         extension = image.filename.split('.')[1]
         # crear nombre unico para la imagen
-        newFilename = uuid.uuid4().hex + '.'+ extension
+        newFilename = uuid.uuid4().hex + '.' + extension
         image.filename = newFilename
         # guardar archivo
         basedir = os.path.abspath(os.path.dirname(__file__))
-        image.save(os.path.join(basedir, app.config['IMAGE_UPLOADS'], image.filename))
+        image.save(os.path.join(
+            basedir, app.config['IMAGE_UPLOADS'], image.filename))
     return jsonify(newFilename)
 
 # FUNCIÓN: eliminar producto de Tienda
 # HTML: shopProducts.html
 # JS: shopProducts.js > deleteItem()
+
+
 @app.route('/shop/product', methods=['DELETE'])
 def deleteProduct():
     data = request.json
@@ -384,17 +395,17 @@ def createAll():
     return 'ok'
 
 
-
 @app.route('/upload-cogImage', methods=['POST'])
 def uploadCogImg():
     print('upload image start')
     if request.files:
         image = request.files['image']
         extension = image.filename.split('.')[1]
-        newFilename = 'cogImage' + '.'+ extension
+        newFilename = 'cogImage' + '.' + extension
         image.filename = newFilename
         basedir = os.path.abspath(os.path.dirname(__file__))
-        image.save(os.path.join(basedir, app.config['IMAGE_UPLOADS'], image.filename))
+        image.save(os.path.join(
+            basedir, app.config['IMAGE_UPLOADS'], image.filename))
     return jsonify(newFilename)
 
 
@@ -404,39 +415,40 @@ def cognitivo():
     skey = '350685a9bcbb437faf47c70aa5401af3'
     endpoint = 'https://computervisionarb.cognitiveservices.azure.com/'
     cognitivo_url = endpoint + "/vision/v3.2/analyze?visualFeatures=Objects"
-    documents = {"url":"https://localhost:5000/static/cogImage.jpg"}
+    documents = {"url": "https://localhost:5000/static/cogImage.jpg"}
 
-    _headers = {"Ocp-Apim-Subscription-Key": skey, 'Content-Type': 'application/octet-stream'}
+    _headers = {"Ocp-Apim-Subscription-Key": skey,
+                'Content-Type': 'application/octet-stream'}
     imageName = 'cogImage.jpg'
 
     basedir = os.path.abspath(os.path.dirname(__file__))
     imgFile = os.path.join(basedir, app.config['IMAGE_UPLOADS'], imageName)
     with open(imgFile, 'rb') as f:
         data = f.read()
-    _response=requests.post(cognitivo_url, headers=_headers, data=data)
+    _response = requests.post(cognitivo_url, headers=_headers, data=data)
     objects = _response.json()
     results = []
 
     print('objects: ', objects)
 
     for object in objects['objects']:
-         results.append(object['object'])
-         finalproducts = []
+        results.append(object['object'])
+        finalproducts = []
     for result in results:
-         queriedProducts = Product.query.filter(Product.name.contains(result)).all()
-         print('queried products: ', queriedProducts)
-         if len(queriedProducts) < 1:
-             print('empty')
-         else:
-             for queriedProduct in queriedProducts:
-                 finalproducts.append(queriedProduct)
+        queriedProducts = Product.query.filter(
+            Product.name.contains(result)).all()
+        print('queried products: ', queriedProducts)
+        if len(queriedProducts) < 1:
+            print('empty')
+        else:
+            for queriedProduct in queriedProducts:
+                finalproducts.append(queriedProduct)
 
     product_schema = ProductSchema(many=True)
     products = product_schema.dump(finalproducts)
-    
+
     return jsonify(products)
     return 'ok'
-
 
 
 @app.route('/event', methods=['POST'])
