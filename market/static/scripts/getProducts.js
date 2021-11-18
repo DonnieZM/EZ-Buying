@@ -252,4 +252,34 @@ closeModal.addEventListener('click', () => {
   modal.style.display = 'none';
 });
 
+//Aqui comienza el js del bot 
+var hint = document.getElementById('botsito');
+var height = hint.clientHeight;
+var width = hint.clientWidth;
+console.log(width + 'x' + height);
+// initialize them (within hint.style)
+hint.style.height = height + 'px';
+hint.style.width = width + 'px'
+
+
+document.getElementById("move-chat").addEventListener("click",function(){
+   /* var resultado = document.getElementById("botsito").classList.toggle("mostrar-chat");*/
+     
+   if(hint.style.visibility == 'hidden'){
+    hint.style.visibility = 'visible';
+    //hint.style.opacity = '1';
+    hint.style.height = height + 'px';
+    hint.style.width = width + 'px';
+    hint.style.padding = '.5em';
+  }
+  else{
+    hint.style.visibility = 'hidden';
+    //hint.style.opacity = '0';
+    hint.style.height = '0';
+    hint.style.width = '0';
+    hint.style.padding = '0';
+  }
+
+});
+
 getProducts();
